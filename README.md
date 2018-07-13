@@ -6,12 +6,12 @@ https://youtu.be/UY7F-yI5QF4 ( this is the video with the analog gauge scale rem
 https://youtu.be/u5U58VDxa34 (this is a video with an original analog gauge scale which is from 0 to 30000RPM)
 https://youtu.be/Aiq3dz5xzpg) (this video shows the output signal of the detector amplifier which is passed to the micro-controller)
 
-Instructable on building the Sensor and connecting it to the Arduino (work in progress to be completed soon)
+Circuit uses around 50mA
 
 ### Prerequisites
 Your favorite Arduino IDE.
 
-You'll also need the Adafruit Adafruit_SSD1306 and the Adafruit-GFX-Library. Both libraries are free and the links are listed below. 
+You'll also need the Adafruit Adafruit_SSD1306 and the Adafruit-GFX-Library. Both libraries are free and the links are listed below.
 https://github.com/adafruit/Adafruit_SSD1306
 https://learn.adafruit.com/adafruit-gfx-graphics-library/overview
 
@@ -30,4 +30,3 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 ## Acknowledgments
 
 * The entire code is from Troy Babour original with a slight modification to match motor (has 8 blades per rotation), detector, reduced analog gauge range and added delay to prevent flickering of the display during the switching on of the circuit.  
-
