@@ -1,22 +1,10 @@
 /*********************************************************************
 RPM Tachometer with OLED digital and analog display
  *********************************************************************/
-
-//One of the next two defines must be uncommented for the type of OLED display
-        //SSD1306 is typically the 0.96" OLED
-#define OLED_TYPE_SSD1306
-        //SH1106 is typically a 1.3" OLED
-//#define OLED_TYPE_SH1106
-
-
-#ifdef OLED_TYPE_SH1106 
-   #include <Adafruit_SH1106.h>
-#endif
-
-#ifdef OLED_TYPE_SSD1306
-  #include <Adafruit_SSD1306.h>
-#endif 
-
+ 
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 #include <Math.h>
 
 namespace {
@@ -31,7 +19,7 @@ namespace {
   const int DISPLAY_FULL_BRIGHTNESS = 255;
   const int DISPLAY_DIM_BRIGHTNESS = 0;
   
-  const int IR_LED_PIN_3 = 3;
+  const int IR_LED_PIN_3 = 5;
   const int PHOTODIODE_PIN_2 = 2;
   const int INTERRUPT_ZERO_ON_PIN_2 = 0;
   
@@ -75,16 +63,17 @@ namespace {
   bool is_oled_display_dim = false;
 }
 
-#ifdef OLED_TYPE_SH1106
-   Adafruit_SH1106 display(OLED_RESET);
-#else
-   Adafruit_SSD1306 display(OLED_RESET);
-#endif
+Adafruit_SSD1306 display(OLED_RESET);
 
 void setup() {
 
-  Serial.begin(9600);
-  initOledDisplayWithI2CAddress(0x3C);
+ delay (MILLIS_PER_SECOND/3); //initial delay to avoid display flickering due to power-on noises
+ 
+ 
+ // Serial.begin(9600);
+
+    
+initOledDisplayWithI2CAddress(0x3C);
   display.setTextColor(WHITE);
   initArrays();
 	
@@ -100,6 +89,8 @@ void initArrays() {
 }
 
 void loop() {
+  
+  
   unsigned long current_millis = millis();
   if (current_millis - last_sensor_time >= DISPLAY_TIMEOUT_INTERVAL) {
     turnOffDisplay();
@@ -114,63 +105,37 @@ void loop() {
 }
 
 void initOledDisplayWithI2CAddress(uint8_t i2c_address) {
-  #ifdef OLED_TYPE_SH1106
-    display.begin(SH1106_SWITCHCAPVCC, i2c_address);
-  #else
-    display.begin(SSD1306_SWITCHCAPVCC, i2c_address);
-  #endif
+  display.begin(SSD1306_SWITCHCAPVCC, i2c_address);
 }
 
 void turnOnDisplay() {
-  commandOledOn();
-}
-
-void commandOledOn() {
-  #ifdef OLED_TYPE_SH1106
-    display.SH1106_command(SH1106_DISPLAYON);
-  #else
-    display.ssd1306_command(SSD1306_DISPLAYON); 
-  #endif
+  display.ssd1306_command(SSD1306_DISPLAYON); 
+  display.dim(false);;
   is_oled_display_on = true;
-  oledDisplayFullBrightness();
+  is_oled_display_dim = false;
 }
 
 void turnOffDisplay() {
-  #ifdef OLED_TYPE_SH1106
-    display.SH1106_command(SH1106_DISPLAYOFF);
-  #else
-    display.ssd1306_command(SSD1306_DISPLAYOFF); 
-  #endif
+  display.ssd1306_command(SSD1306_DISPLAYOFF); 
   is_oled_display_on = false;
   is_oled_display_dim = false;
 }
 
 void dimDisplay() {
-  oledDisplayDim();
-}
-
-void oledDisplayDim() {
-  #ifdef OLED_TYPE_SSD1306 
-    display.dim(true); 
-  #endif
+  display.dim(true);
   is_oled_display_dim = true;
 }
 
-void oledDisplayFullBrightness() {
-  #ifdef OLED_TYPE_SSD1306 
-    display.dim(false); 
-  #endif
-  is_oled_display_dim = false;
-}
-
 void turnOnIrLED() {
-  pinMode(IR_LED_PIN_3, OUTPUT);
-  digitalWrite(IR_LED_PIN_3, HIGH);
+  //pinMode(IR_LED_PIN_3, OUTPUT);
+  //digitalWrite(IR_LED_PIN_3, HIGH);
 }
-
+                                                                                                                                                                                                                                                                                        
 void attachPhotodiodeToInterrruptZero() {
-  pinMode(PHOTODIODE_PIN_2, INPUT_PULLUP);
-  attachInterrupt(INTERRUPT_ZERO_ON_PIN_2, incrementRevolution, FALLING);
+  pinMode(PHOTODIODE_PIN_2, INPUT);
+  //attachInterrupt(INTERRUPT_ZERO_ON_PIN_2, incrementRevolution, R);
+  attachInterrupt(digitalPinToInterrupt(INTERRUPT_ZERO_ON_PIN_2), incrementRevolution, FALLING);
+  
 }
 
 void incrementRevolution() {
@@ -207,7 +172,7 @@ long calculateRpm() {
   float elapsed_seconds = ((elapsed_millis * 1.0) / MILLIS_PER_SECOND);
   float delta_revolutions = (current_revolutions - previous_revolutions) * 1.0;
 
-  long rpm = (long) ((delta_revolutions / elapsed_seconds) * SECONDS_PER_MINUTE);
+  long rpm = (long) ((delta_revolutions / elapsed_seconds)/8 * SECONDS_PER_MINUTE);
   return rpm;
 }
 
@@ -291,8 +256,8 @@ void drawIndicatorHand(long rpm_value) {
     uint16_t indicator_top_x = getCircleXWithLengthAndAngle(INDICATOR_LENGTH, indicator_angle);
     uint16_t indicator_top_y = getCircleYWithLengthAndAngle(INDICATOR_LENGTH, indicator_angle);
 
-	display.drawTriangle(DIAL_CENTER_X - INDICATOR_WIDTH / 2,
-	                     DIAL_CENTER_Y,DIAL_CENTER_X + INDICATOR_WIDTH / 2,
+	display.drawTriangle(DIAL_CENTER_X - INDICATOR_WIDTH / PHOTODIODE_PIN_2,
+	                     DIAL_CENTER_Y,DIAL_CENTER_X + INDICATOR_WIDTH / PHOTODIODE_PIN_2,
 	                     DIAL_CENTER_Y,
 	                     indicator_top_x, 
 	                     indicator_top_y, 
