@@ -29,5 +29,5 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ## Acknowledgments
 
-* The entire code is from Troy Babour original with a slight modification to match motor (has 8 blades per rotation),  reduced analog gauge range and added delay to prevent flickering of the display during the switching on of the circuit .  
+* The entire code is from Troy Babour original with a slight modification to match motor (has 8 blades per rotation), detector, reduced analog gauge range and added delay to prevent flickering of the display during the switching on of the circuit.  
 
